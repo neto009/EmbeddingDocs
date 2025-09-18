@@ -29,6 +29,10 @@ spring:
       embedding:
         options:
           model: text-embedding-bge-m3
+          dim: 1024
+          batchSize: 700
+          requestTimeout: 120000
+
 
 rag:
   search:

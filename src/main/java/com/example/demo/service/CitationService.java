@@ -14,8 +14,8 @@ public class CitationService {
 
     public List<RAGAnswerService.Citation> createCitations(List<SearchService.Result> hits) {
         return hits.stream()
-                .map(this::toCitation)
-                .toList();
+            .map(this::toCitation)
+            .toList();
     }
 
     private RAGAnswerService.Citation toCitation(SearchService.Result hit) {
