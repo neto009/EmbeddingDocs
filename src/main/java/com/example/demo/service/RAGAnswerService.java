@@ -33,11 +33,11 @@ public class RAGAnswerService {
         this.citationService = citationService;
     }
 
-    public AnswerResponse answer(String question, Integer k, Double alpha, Integer perDoc) {
-        var searchParams = buildSearchParams(k, alpha, perDoc);
+    public AnswerResponse answer(String question, Integer k, Integer perDoc) {
+        var searchParams = buildSearchParams(k, perDoc);
 
         var hits = searchService.hybridSearch(question, searchParams.topK(),
-            searchParams.alpha(), searchParams.perDoc());
+             searchParams.perDoc());
 
         var fullContents = searchService.searchTopDocsFullContents(question, searchParams.perDoc());
         var context = String.join("\n\n", fullContents);
@@ -59,15 +59,14 @@ public class RAGAnswerService {
             .content();
     }
 
-    private SearchParams buildSearchParams(Integer k, Double alpha, Integer perDoc) {
+    private SearchParams buildSearchParams(Integer k, Integer perDoc) {
         return new SearchParams(
             k != null ? k : ragProperties.getSearch().getDefaultK(),
-            alpha != null ? alpha : ragProperties.getSearch().getDefaultAlpha(),
             perDoc != null ? perDoc : ragProperties.getSearch().getDefaultPerDoc()
         );
     }
 
-    private record SearchParams(int topK, double alpha, int perDoc) {}
+    private record SearchParams(int topK, int perDoc) {}
 
     public record Citation(UUID documentId, int chunkIndex, String preview, double score) {}
 

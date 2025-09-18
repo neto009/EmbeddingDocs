@@ -38,17 +38,15 @@ class RagController {
     public List<SearchService.Result> hybrid(
             @RequestParam("q") String q,
             @RequestParam(value = "k", defaultValue = "8") int k,
-            @RequestParam(value = "alpha", defaultValue = "0.7") double alpha,
             @RequestParam(value = "perDoc", defaultValue = "2") int perDoc
     ) {
-        return search.hybridSearch(q, k, alpha, perDoc);
+        return search.hybridSearch(q, k, perDoc);
     }
 
     @PostMapping("/answer")
     public RAGAnswerService.AnswerResponse answer(@RequestBody AnswerRequest req) throws IOException {
-        return service.answer(req.question(), req.k(), req.alpha(), req.perDoc());
+        return service.answer(req.question(), req.k(), req.perDoc());
     }
 
-    public record AnswerRequest(String question, Integer k, Double alpha, Integer perDoc) {}
-
+    public record AnswerRequest(String question, Integer k, Integer perDoc) {}
 }
