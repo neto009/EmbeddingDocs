@@ -96,7 +96,7 @@ public class EmbeddingJobService {
      */
     private Optional<List<Object[]>> tryEmbedPartition(List<Row> validRows) {
         List<String> inputs = validRows.stream().map(Row::content).toList();
-        List<float[]> embeddings = lm.embedBatch(inputs, props.getModel(), props.getRequestTimeout());
+        List<float[]> embeddings = lm.embedBatch(inputs, props.getModel());
         if (embeddings.size() != validRows.size()) return Optional.empty();
         List<Object[]> entries = IntStream.range(0, validRows.size())
             .mapToObj(i -> new Object[]{toPgVectorLiteral(embeddings.get(i)), validRows.get(i).id()})

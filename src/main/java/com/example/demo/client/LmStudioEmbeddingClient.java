@@ -1,46 +1,35 @@
 package com.example.demo.client;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.EmbeddingRequest;
+import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class LmStudioEmbeddingClient {
 
-    private final WebClient lmStudioWebClient;
+    private final EmbeddingModel embeddingModel;
 
-    public List<float[]> embedBatch(List<String> texts, String model, java.time.Duration timeout) {
-        EmbeddingRequest req = new EmbeddingRequest(model, texts);
+    /**
+     * Gera embeddings em lote para a lista de textos informada.
+     * @param texts  lista de textos de entrada; se vazia ou nula retorna lista vazia
+     * @param model  nome do modelo a ser utilizado (não deve ser nulo)
+     * @return lista imutável de vetores de floats (um por texto); vazia em caso de erro ou ausência de dados
+     * @throws org.springframework.web.reactive.function.client.WebClientResponseException em falhas HTTP (não tratadas aqui)
+     * @throws java.util.concurrent.TimeoutException se a operação exceder o tempo definido
+     */
+    public List<float[]> embedBatch(List<String> texts, String model) {
+        EmbeddingRequest req = new EmbeddingRequest(texts, null);
+        EmbeddingResponse resp = embeddingModel.call(req);
 
-        EmbeddingResponse resp = lmStudioWebClient.post()
-            .uri("/embeddings")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(req)
-            .retrieve()
-            .bodyToMono(EmbeddingResponse.class)
-            .timeout(timeout)
-            .block();
-
-        if (resp == null || resp.data == null) return List.of();
-
-        List<float[]> out = new ArrayList<>(resp.data.size());
-        for (EmbeddingResponse.Data d : resp.data) {
-            float[] v = new float[d.embedding.size()];
-            for (int i = 0; i < v.length; i++) v[i] = d.embedding.get(i).floatValue();
-            out.add(v);
-        }
-        return out;
-    }
-
-    // OpenAI-like schema
-    public record EmbeddingRequest(String model, List<String> input) {}
-    public static final class EmbeddingResponse {
-        public List<Data> data;
-        public static final class Data { public List<Double> embedding; }
+        return resp.getResults().stream()
+            .filter(Objects::nonNull)
+            .map(d -> d.getOutput())
+            .toList();
     }
 }
