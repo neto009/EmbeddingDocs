@@ -94,10 +94,10 @@ public class SearchService {
         """;
 
         List<UUID> docIds = jdbc.query(
-                sql,
-                (rs, i) -> (UUID) rs.getObject("document_id"),
-                vec,
-                topDocs
+            sql,
+            (rs, i) -> (UUID) rs.getObject("document_id"),
+            vec,
+            topDocs
         );
 
         List<String> out = new ArrayList<>(docIds.size());
